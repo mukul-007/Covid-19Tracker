@@ -3,9 +3,10 @@ package com.example.myapplication.activities
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
+import android.widget.RelativeLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.Request
 import com.android.volley.RequestQueue
@@ -35,15 +36,17 @@ class MainActivity : AppCompatActivity() {
     private lateinit var pieChart: PieChart
     private var requestQueue: RequestQueue? = null
     private lateinit var trackButton: Button
+    private lateinit var relativeLayout: RelativeLayout
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+        override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        relativeLayout = findViewById(R.id.relative_main)
+        relativeLayout.visibility = View.INVISIBLE
         initView()
         jsonParse()
 
         trackButton.setOnClickListener {
-            Toast.makeText(this, "Clicked Track Button!", Toast.LENGTH_SHORT).show()
             var intent : Intent = Intent(this, TrackCountryActivity::class.java)
             startActivity(intent)
         }
@@ -88,7 +91,6 @@ class MainActivity : AppCompatActivity() {
             affectedCountries.text = response.getString("affectedCountries")
 
             setPieChart()
-
         } catch (e: JSONException) {
             e.printStackTrace()
         }
@@ -96,16 +98,19 @@ class MainActivity : AppCompatActivity() {
         requestQueue?.add(request)
     }
 
-    fun setPieChart(){
+    private fun setPieChart(){
 
-        pieChart.addPieSlice(PieModel("Total Cases",
-            totalCases.text.toString().toInt().toFloat(), Color.parseColor("#ff920c")))
+        pieChart.addPieSlice(
+            PieModel("Total Cases",
+            totalCases.text.toString().toInt().toFloat(), Color.parseColor("#ffd600")))
         pieChart.addPieSlice(PieModel("Active Cases",
-            activeCases.text.toString().toInt().toFloat(), Color.parseColor("#0075cb")))
+            activeCases.text.toString().toInt().toFloat(), Color.parseColor("#2962ff")))
         pieChart.addPieSlice(PieModel("Recovered",
-            recovered.text.toString().toInt().toFloat(), Color.parseColor("#3eea17")))
+            recovered.text.toString().toInt().toFloat(), Color.parseColor("#64dd17")))
         pieChart.addPieSlice(PieModel("Deaths",
             deaths.text.toString().toInt().toFloat(), Color.parseColor("#ff0000")))
+
+        relativeLayout.visibility = View.VISIBLE
 
         pieChart.startAnimation()
 

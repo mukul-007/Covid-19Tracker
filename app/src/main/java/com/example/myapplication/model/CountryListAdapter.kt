@@ -16,6 +16,7 @@ class CountryListAdapter(var mCntx: Context, var resource: Int, var items: List<
     resource,
     items
 ){
+
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val layoutInflater: LayoutInflater = LayoutInflater.from(mCntx)
         val view: View = layoutInflater.inflate(resource, null)

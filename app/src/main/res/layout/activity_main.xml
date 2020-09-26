@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#faf5ff"
-    tools:context=".activities.MainActivity">
+    tools:context=".activities.MainActivity"
+    android:id="@+id/relative_main">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView"
@@ -586,7 +587,7 @@
         android:textStyle="bold"
         android:textColor="@color/cardview_light_background"
         android:textSize="24sp"
-        android:background="#ff6f16"
+        android:background="@drawable/track_button_background"
         android:padding="5dp"
         android:layout_alignParentBottom="true"/>
     

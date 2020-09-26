@@ -7,6 +7,7 @@ import android.text.TextWatcher
 import android.view.View
 import android.widget.EditText
 import android.widget.ListView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.Request
@@ -25,44 +26,96 @@ import org.json.JSONObject
 
 class TrackCountryActivity : AppCompatActivity() {
 
+    private lateinit var noResult: TextView
     private lateinit var searchETX : EditText
     private lateinit var countryListView: ListView
     private lateinit var arcLoader: SimpleArcLoader
     private var requestQueue: RequestQueue? = null
-    private var countryModels : MutableList<CountryModel> = arrayListOf()
+    var CountryModels : MutableList<CountryModel> = arrayListOf()
+    var DisplayModels: MutableList<CountryModel> = arrayListOf()
     private lateinit var adapter: CountryListAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_track_country)
         initViews()
-        adapter = CountryListAdapter(this, R.layout.country_item, countryModels)
-        countryListView.adapter = adapter
         loader.start()
         jsonParse()
-
+        DisplayModels.addAll(CountryModels)
+        
         countryListView.setOnItemClickListener { parent, view, position, id ->
 
-            Toast.makeText(this, countryModels.get(position).country.toString(), Toast.LENGTH_SHORT).show()
-
             var intent = Intent(this, CountryDetailsActivity::class.java)
-            intent.putExtra("Model", countryModels.get(position))
+            if(DisplayModels.size != 0) {
+                intent.putExtra("Model", DisplayModels.get(position))
+            }else{
+                intent.putExtra("Model", CountryModels.get(position))
+            }
             startActivity(intent)
         }
 
         searchETX.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
+                noResult.visibility = View.INVISIBLE
+            }
+
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                adapter.getFilter().filter(s)
+                noResult.visibility = View.INVISIBLE
+
+                if (!s.equals(null) || !s.equals("")) {
+                    DisplayModels.clear()
+                    for (c: CountryModel in CountryModels) {
+                        if (c.country?.startsWith(s, true)!!) {
+                            DisplayModels.add(c)
+                        }
+                    }
+                    adapter = CountryListAdapter(
+                        this@TrackCountryActivity,
+                        R.layout.country_item,
+                        DisplayModels
+                    )
+
+                    countryListView.adapter = adapter
+                    adapter.notifyDataSetChanged()
+
+                    if(DisplayModels.size == 0){
+                        noResult.visibility = View.VISIBLE
+                    }
+                }
+
             }
 
             override fun afterTextChanged(s: Editable) {
-                adapter.getFilter().filter(s);
+                noResult.visibility = View.INVISIBLE
+
+                if (!s.equals(null) || !s.equals("")) {
+                    DisplayModels.clear()
+                    for (c: CountryModel in CountryModels) {
+                        if (c.country?.startsWith(s, true)!!) {
+                            DisplayModels.add(c)
+                        }
+                    }
+                    adapter = CountryListAdapter(
+                        this@TrackCountryActivity,
+                        R.layout.country_item,
+                        DisplayModels
+                    )
+
+                    countryListView.adapter = adapter
+                    adapter.notifyDataSetChanged()
+
+                    if(DisplayModels.size == 0){
+                        noResult.visibility = View.VISIBLE
+                    }
+                }
             }
         })
+
     }
 
     private fun initViews(){
+        noResult = findViewById(R.id.noResultTXT)
         searchETX = findViewById(R.id.search_ETX)
         countryListView = findViewById(R.id.countryList)
         countryListView.setTextFilterEnabled(true)
@@ -82,9 +135,10 @@ class TrackCountryActivity : AppCompatActivity() {
 
                 for (i in 0 until response.length()) {
                     var countryModel: CountryModel = setModel(response.getJSONObject(i))
-                    countryModels.add(i, countryModel)
+                    CountryModels.add(i, countryModel)
                 }
-
+                adapter = CountryListAdapter(this, R.layout.country_item, CountryModels)
+                countryListView.adapter = adapter
                 adapter.notifyDataSetChanged()
                 loader.visibility = View.GONE
             } catch (e: JSONException) {
@@ -138,4 +192,5 @@ class TrackCountryActivity : AppCompatActivity() {
 
         return countryInfo
     }
+
 }
